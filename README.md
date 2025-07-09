@@ -239,67 +239,80 @@ yarn test --watch
 
 ## Deployment
 
-### Firebase Deployment
+### Prerequisites
 
-**1. Install Firebase CLI**
+**1. Install Firebase CLI (if not already installed)**
 ```bash
-sudo yarn global add firebase-tools
+# Firebase CLI is included in package.json, use npx
+npx firebase login
 ```
 
 **2. Login to Firebase**
 ```bash
-firebase login
+npx firebase login
 ```
 
-**3. Initialize Firebase (First Time Only)**
-```bash
-firebase init
-```
-- Select: "Hosting: Configure files for Firebase Hosting"
-- Public directory: `build`
-- Single-page app: `Yes`
-- Overwrite index.html: `No`
-
-**4. Build and Deploy**
-```bash
-# Clean cache
-yarn cache clean
-
-# Build production version
-yarn run build
-
-# Deploy to Firebase
-firebase deploy
-```
+**3. Verify Firebase Configuration**
+The project is already configured with `firebase.json`. Current settings:
+- **Public directory**: `build`
+- **Single-page app**: `Yes` (rewrites to `/index.html`)
+- **Current project**: `voyage-r4d3k2`
 
 ### Manual Deployment Steps
 
-**1. Prepare Build**
+**1. Build the Application**
 ```bash
-# Clean environment
+# Build for production (using legacy OpenSSL for Node.js compatibility)
+NODE_OPTIONS=--openssl-legacy-provider npm run build
+```
+
+**Note**: The `NODE_OPTIONS=--openssl-legacy-provider` flag is required due to Node.js compatibility issues with the older React Scripts version used in this project.
+
+**2. Deploy to Firebase**
+```bash
+# Deploy to Firebase hosting
+npx firebase deploy --only hosting
+```
+
+**3. Verify Deployment**
+- **Live URL**: https://voyage-r4d3k2.firebaseapp.com
+- **Firebase Console**: https://console.firebase.google.com/project/voyage-r4d3k2/overview
+
+### Testing Production Build Locally (Optional)
+
+**1. Install serve globally**
+```bash
+yarn global add serve
+```
+
+**2. Test production build**
+```bash
+serve -s build
+```
+
+**3. Access local production build**
+- Open browser to: http://localhost:3000 (or displayed port)
+
+### Complete Deployment Workflow
+
+**Full deployment process from clean state:**
+```bash
+# 1. Clean environment (optional)
 yarn cache clean
 rm -rf build/
 rm -rf node_modules/
 
-# Fresh install
+# 2. Fresh install (optional)
 yarn install
 
-# Build for production
-yarn run build
-```
+# 3. Build for production
+NODE_OPTIONS=--openssl-legacy-provider npm run build
 
-**2. Test Production Build Locally**
-```bash
-# Install serve globally
-yarn global add serve
+# 4. Deploy to Firebase
+npx firebase deploy --only hosting
 
-# Test production build
-serve -s build
-```
-
-**3. Deploy to Firebase**
-```bash
-firebase deploy --only hosting
+# 5. Verify deployment
+# Visit: https://voyage-r4d3k2.firebaseapp.com
 ```
 
 ### Backend Deployment
@@ -313,8 +326,8 @@ The backend Flask server is intended for local development only. For production:
 ## Deployed Addresses
 
 ### Production Deployment
-- **Frontend**: https://maestro-eeg.web.app (Firebase Hosting)
-- **Alternative**: https://maestro-eeg.firebaseapp.com
+- **Frontend**: https://voyage-r4d3k2.firebaseapp.com (Firebase Hosting)
+- **Firebase Console**: https://console.firebase.google.com/project/voyage-r4d3k2/overview
 - **Backend**: Local development only (no production backend)
 
 ### Development Endpoints
