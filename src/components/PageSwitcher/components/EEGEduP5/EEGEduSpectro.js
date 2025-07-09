@@ -28,8 +28,8 @@ import { chartStyles, generalOptions } from "../chartOptions";
 import * as generalTranslations from "../translations/en";
 import * as specificTranslations from "./translations/en";
 
-import { createTheme, withStyles, makeStyles, ThemeProvider } from '@material-ui/core/styles';
-import { green, red, purple } from '@material-ui/core/colors';
+import { withStyles } from '@material-ui/core/styles';
+import { purple } from '@material-ui/core/colors';
 
 var eventLog = [];
 var eventNoteLog = 0;
@@ -44,7 +44,6 @@ var xlabels = [];
 var xlabelsHR = [];
 var currentHR = 0;
 var stopTheRecording = false;
-var traumaTherapy = false;
 
 //var firstTime = 0;
 //var firstTimeHR = 0;
@@ -852,120 +851,28 @@ export function RenderRecord(render, setData, recordPopChange, recordPop, status
               </Button>
           </Grid>
 
+   
+
           </Grid>
 
           <br />
 
-          {/* New Emotional/Cognitive State Buttons */}
-          <Grid
-            container
-            spacing={1}
-            direction={'row'}
-            justify={'left'}
-            alignItems={'center'}
-          >
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  var thisEventTime = xlabels[xlabels.length - 1];
-                  eventLog.push(thisEventTime)
-                  eventNoteLog = 'INSIGHT';
-                  createNotification("info", "Pressed Button...", eventNoteLog);
-                  eventPress = Date.now();
-                  saveDataToCsv([eventNoteLog], eventType, eventColStart, eventColNum)
-                }}
-                primary={status !== generalTranslations.connect}
-                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
-              > 
-                {'INSIGHT'}  
-              </Button>
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  var thisEventTime = xlabels[xlabels.length - 1];
-                  eventLog.push(thisEventTime)
-                  eventNoteLog = 'FEAR';
-                  createNotification("info", "Pressed Button...", eventNoteLog);
-                  eventPress = Date.now();
-                  saveDataToCsv([eventNoteLog], eventType, eventColStart, eventColNum)
-                }}
-                primary={status !== generalTranslations.connect}
-                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
-              > 
-                {'FEAR'}  
-              </Button>
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  var thisEventTime = xlabels[xlabels.length - 1];
-                  eventLog.push(thisEventTime)
-                  eventNoteLog = 'SADNESS';
-                  createNotification("info", "Pressed Button...", eventNoteLog);
-                  eventPress = Date.now();
-                  saveDataToCsv([eventNoteLog], eventType, eventColStart, eventColNum)
-                }}
-                primary={status !== generalTranslations.connect}
-                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
-              > 
-                {'SADNESS'}  
-              </Button>
-            </Grid>
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  var thisEventTime = xlabels[xlabels.length - 1];
-                  eventLog.push(thisEventTime)
-                  eventNoteLog = 'VISION';
-                  createNotification("info", "Pressed Button...", eventNoteLog);
-                  eventPress = Date.now();
-                  saveDataToCsv([eventNoteLog], eventType, eventColStart, eventColNum)
-                }}
-                primary={status !== generalTranslations.connect}
-                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
-              > 
-                {'VISION'}  
-              </Button>
-            </Grid>
-          </Grid>
-
-          <br />
-
-          {/* Custom Event Logging Section */}
-          <Grid
-            container
-            spacing={1}
-            direction={'row'}
-            justify={'left'}
-            alignItems={'center'}
-          >
-            <Grid item>
-              <Button
-                color="primary"
-                variant="contained"
-                onClick={() => {
-                  var thisEventTime = xlabels[xlabels.length - 1];
-                  eventLog.push(thisEventTime)
-                  createNotification("info", "Pressed Button...", eventNoteLog);
-                  eventPress = Date.now();
-                  setCustomLogLive(true);
-                }}
-                primary={status !== generalTranslations.connect}
-                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
-              > 
-                {'Log Custom Event'}  
-              </Button>
-            </Grid>
-          </Grid>
+          
+        <Button
+            color="primary"
+            variant="contained"
+            onClick={() => {
+              var thisEventTime = xlabels[xlabels.length - 1];
+              eventLog.push(thisEventTime)
+              createNotification("info", "Pressed Button...", eventNoteLog);
+              eventPress = Date.now();
+              setCustomLogLive(true);
+            }}
+            primary={status !== generalTranslations.connect}
+            disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
+          > 
+            {'Log Custom Event'}  
+          </Button>
           
       <br />
       <h4>Custom Event Note:</h4>
@@ -1214,7 +1121,6 @@ function buildCSV(Settings) {
         
         //get the frequency bin centers
         var fftResolution = (Settings.srate / Settings.bins)
-        var fftFreqs = [];
         var dataChunked = [];
         for (var electrode = 0; electrode < data.length; electrode++){
             for (var i = 0; (fftResolution * i) < (Settings.srate/2); i++) { //keep going until hit Nyquist limit - there are others ways to get this number too
