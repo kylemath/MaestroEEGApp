@@ -1,0 +1,17 @@
+.logo {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  height: auto;
+  width: 30vw;
+}
+
+.flexyRow {
+    display: flex;
+    flex-direction: row;
+}
+
+.flexyColumn {
+    display: flex;
+    flex-direction: column;
+}

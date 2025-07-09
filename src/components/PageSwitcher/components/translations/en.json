@@ -1,0 +1,11 @@
+{
+  "connect": "Connect Headband",
+  "connectMock": "Connect Mock Data",
+  "connecting": "Connecting to Headband...",
+  "connectingMock": "Connecting to Mock Data",
+  "connected": "Headband Connected",
+  "connectedMock": "Mock Data Connected",
+  "connectionFailed": "Connection failed",
+  "disconnect": "Disconnect",
+  "channel": "Channel: "
+}
