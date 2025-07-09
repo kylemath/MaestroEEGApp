@@ -8,10 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Build React App
+        run: |
+          npm install
+          NODE_OPTIONS="--openssl-legacy-provider" npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_FACEOFF_1D2B8 }}'
-          projectId: faceoff-1d2b8
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_VOYAGE_R4D3K2 }}'
+          projectId: voyage-r4d3k2
         env:
           FIREBASE_CLI_PREVIEWS: hostingchannels

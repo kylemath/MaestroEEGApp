@@ -852,28 +852,120 @@ export function RenderRecord(render, setData, recordPopChange, recordPop, status
               </Button>
           </Grid>
 
-   
-
           </Grid>
 
           <br />
 
-          
-        <Button
-            color="primary"
-            variant="contained"
-            onClick={() => {
-              var thisEventTime = xlabels[xlabels.length - 1];
-              eventLog.push(thisEventTime)
-              createNotification("info", "Pressed Button...", eventNoteLog);
-              eventPress = Date.now();
-              setCustomLogLive(true);
-            }}
-            primary={status !== generalTranslations.connect}
-            disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
-          > 
-            {'Log Custom Event'}  
-          </Button>
+          {/* New Emotional/Cognitive State Buttons */}
+          <Grid
+            container
+            spacing={1}
+            direction={'row'}
+            justify={'left'}
+            alignItems={'center'}
+          >
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  var thisEventTime = xlabels[xlabels.length - 1];
+                  eventLog.push(thisEventTime)
+                  eventNoteLog = 'INSIGHT';
+                  createNotification("info", "Pressed Button...", eventNoteLog);
+                  eventPress = Date.now();
+                  saveDataToCsv([eventNoteLog], eventType, eventColStart, eventColNum)
+                }}
+                primary={status !== generalTranslations.connect}
+                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
+              > 
+                {'INSIGHT'}  
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  var thisEventTime = xlabels[xlabels.length - 1];
+                  eventLog.push(thisEventTime)
+                  eventNoteLog = 'FEAR';
+                  createNotification("info", "Pressed Button...", eventNoteLog);
+                  eventPress = Date.now();
+                  saveDataToCsv([eventNoteLog], eventType, eventColStart, eventColNum)
+                }}
+                primary={status !== generalTranslations.connect}
+                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
+              > 
+                {'FEAR'}  
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  var thisEventTime = xlabels[xlabels.length - 1];
+                  eventLog.push(thisEventTime)
+                  eventNoteLog = 'SADNESS';
+                  createNotification("info", "Pressed Button...", eventNoteLog);
+                  eventPress = Date.now();
+                  saveDataToCsv([eventNoteLog], eventType, eventColStart, eventColNum)
+                }}
+                primary={status !== generalTranslations.connect}
+                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
+              > 
+                {'SADNESS'}  
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => {
+                  var thisEventTime = xlabels[xlabels.length - 1];
+                  eventLog.push(thisEventTime)
+                  eventNoteLog = 'VISION';
+                  createNotification("info", "Pressed Button...", eventNoteLog);
+                  eventPress = Date.now();
+                  saveDataToCsv([eventNoteLog], eventType, eventColStart, eventColNum)
+                }}
+                primary={status !== generalTranslations.connect}
+                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
+              > 
+                {'VISION'}  
+              </Button>
+            </Grid>
+          </Grid>
+
+          <br />
+
+          {/* Custom Event Logging Section */}
+          <Grid
+            container
+            spacing={1}
+            direction={'row'}
+            justify={'left'}
+            alignItems={'center'}
+          >
+            <Grid item>
+              <Button
+                color="primary"
+                variant="contained"
+                onClick={() => {
+                  var thisEventTime = xlabels[xlabels.length - 1];
+                  eventLog.push(thisEventTime)
+                  createNotification("info", "Pressed Button...", eventNoteLog);
+                  eventPress = Date.now();
+                  setCustomLogLive(true);
+                }}
+                primary={status !== generalTranslations.connect}
+                disabled={endingSessionPrompt || status === generalTranslations.connect || !recordPop || customLogLive}
+              > 
+                {'Log Custom Event'}  
+              </Button>
+            </Grid>
+          </Grid>
           
       <br />
       <h4>Custom Event Note:</h4>
