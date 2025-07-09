@@ -12,6 +12,8 @@ jobs:
         run: |
           npm install
           NODE_OPTIONS="--openssl-legacy-provider" npm run build
+        env:
+          SKIP_PREFLIGHT_CHECK: true
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
