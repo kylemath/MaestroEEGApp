@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MAESTRO Backend Server</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #333; }
+        .info { background: #f0f0f0; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .nav { margin: 20px 0; }
+        .nav a { margin-right: 20px; color: #007bff; text-decoration: none; }
+        .nav a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>MAESTRO Backend Server</h1>
+    <div class="info">
+        <p><strong>Status:</strong> Server is running successfully!</p>
+        <p><strong>Temp Directory:</strong> {{ tempdir }}</p>
+        <p><strong>Purpose:</strong> This server handles file uploads from the MAESTRO frontend application.</p>
+    </div>
+    
+    <div class="nav">
+        <a href="/upload_form">Upload Form</a>
+        <a href="http://localhost:3000" target="_blank">Frontend App</a>
+    </div>
+    
+    <h2>Available Endpoints:</h2>
+    <ul>
+        <li><code>GET /</code> - This page</li>
+        <li><code>GET /upload_form</code> - File upload form</li>
+        <li><code>POST /singleupload</code> - Upload a single file</li>
+    </ul>
+</body>
+</html> 

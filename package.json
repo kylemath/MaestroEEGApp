@@ -1,0 +1,58 @@
+{
+  "engines": {
+    "npm": "5.x",
+    "node": "10.x"
+  },
+  "name": "voyage",
+  "version": "3.1.0",
+  "private": true,
+  "dependencies": {
+    "@babel/plugin-transform-react-jsx": "^7.12.7",
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@material/button": "^14.0.0",
+    "@neurosity/pipes": "^3.0.2",
+    "@shopify/polaris": "^4.9.0",
+    "chart.js": "^2.7.2",
+    "file-saver": "^2.0.2",
+    "firebase": "^7.5.0",
+    "firebase-tools": "^7.9.0",
+    "handlebars": "^4.3.0",
+    "material-ui": "^0.20.2",
+    "mui": "^0.0.1",
+    "muse-js": "https://github.com/caydenpierce/muse-js#ppg_build",
+    "nextcloud-chunk-file-upload": "^1.1.0",
+    "p5": "^0.10.2",
+    "p5.js-widget": "https://github.com/toolness/p5.js-widget.git",
+    "prettier": "^1.19.1",
+    "react": "^16.12.0",
+    "react-chartjs-2": "^2.7.2",
+    "react-dom": "^16.4.1",
+    "react-full-screen": "^0.3.2-0",
+    "react-notifications": "^1.7.4",
+    "react-p5-wrapper": "^2.0.0",
+    "react-router-dom": "^6.3.0",
+    "react-scripts": "^3.2.0",
+    "react-webcam": "^5.2.2",
+    "rxjs": "^6.5.3",
+    "webdav": "^4.11.0"
+  },
+  "scripts": {
+    "start": "react-scripts --max_old_space_size=4096 start",
+    "build": "react-scripts --max_old_space_size=4096 build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
