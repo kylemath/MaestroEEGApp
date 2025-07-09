@@ -1,119 +1,460 @@
-# MAESTRO V2
+# MAESTRO V2 - Real-time EEG Monitoring
 
-Kyle Mathewson
+**Author**: Kyle Mathewson  
+**Version**: 3.1.0
 
-# Installation for Development 
+MAESTRO V2 is a web application for recording and analyzing real-time EEG data from Muse headbands. The application provides real-time visualization of brain activity, heart rate monitoring, and comprehensive data logging capabilities.
 
-If you are interested in developing, here are some instructions to get the software running on your system. *Note*: Currently development requires a Mac OSX operating system. 
+## Table of Contents
+- [Features](#features)
+- [CSV Data Structure](#csv-data-structure)
+- [Installation](#installation)
+- [Local Development](#local-development)
+- [Testing](#testing)
+- [Deployment](#deployment)
+- [Deployed Addresses](#deployed-addresses)
+- [Contributing](#contributing)
 
-To start, you will need to install [Homebrew](https://brew.sh) and [yarn](https://yarnpkg.com/lang/en/docs/install/#mac-stable). These are easy to install with the following Terminal / `bash` commands:
+## Features
 
-```sh
-## Install homebrew
+- **Real-time EEG Visualization**: Live frequency band analysis (Delta, Theta, Alpha, Beta, Gamma)
+- **Heart Rate Monitoring**: PPG-based heart rate calculation with live display
+- **Event Logging**: Button-based event marking for research protocols
+- **3-Minute Recording**: Automated 3-minute recording sessions with countdown timer
+- **Data Export**: Comprehensive CSV data export with all sensor streams
+- **Session Management**: Patient information tracking and session completion
+
+## CSV Data Structure
+
+The application exports data to CSV files with the following structure:
+
+### File Naming Convention
+```
+patientID[ID]_age[AGE]_gender[GENDER]_weight[WEIGHT]_substance[SUBSTANCE]_dosage[DOSAGE]_dosageTime[TIME]_time[TIMESTAMP]_MAESTRORecording.csv
+```
+
+### Column Structure
+
+#### Header Row
+```csv
+type,timestamp,gyroX,gyroY,gyroZ,accelerometerX,accelerometerY,accelerometerZ,ppg1_ambient,ppg2_infrared,ppg3_red,event,e1_0,e1_1,e1_2,...
+```
+
+#### Data Types and Fields
+
+**1. Metadata Fields**
+- `type`: Data stream type (`eeg`, `ppg`, `gyro`, `accelerometer`, `event`)
+- `timestamp`: Unix timestamp in seconds (e.g., `1752090350.543`)
+
+**2. Gyroscope Data** (`gyro` type)
+- `gyroX`: X-axis rotation (radians/second)
+- `gyroY`: Y-axis rotation (radians/second)  
+- `gyroZ`: Z-axis rotation (radians/second)
+- *Other columns empty for gyro data*
+
+**3. Accelerometer Data** (`accelerometer` type)
+- `accelerometerX`: X-axis acceleration (g-force)
+- `accelerometerY`: Y-axis acceleration (g-force)
+- `accelerometerZ`: Z-axis acceleration (g-force)
+- *Other columns empty for accelerometer data*
+
+**4. PPG Data** (`ppg` type)
+- `ppg1_ambient`: Ambient light sensor reading
+- `ppg2_infrared`: Infrared LED sensor reading
+- `ppg3_red`: Red LED sensor reading (used for heart rate calculation)
+- *Other columns empty for PPG data*
+
+**5. Event Data** (`event` type)
+- `event`: Event description/label
+  - `3MIN_RECORDING_START`: 3-minute recording session started
+  - `3MIN_RECORDING_END`: 3-minute recording completed naturally
+  - `3MIN_RECORDING_END_MANUAL`: 3-minute recording stopped manually
+  - `3MIN_TICK_N`: Second-by-second tick during 3-minute recording (N = 1-180)
+  - `LOSS OF CONSCIOUSNESS`: Patient lost consciousness (button press)
+  - `RE-GAIN CONSCIOUSNESS`: Patient regained consciousness (button press)
+  - `EYES OPEN`: Patient opened eyes (button press)
+  - `EYES CLOSED`: Patient closed eyes (button press)
+  - Custom event text (entered by user)
+- *Other columns empty for event data*
+
+**6. EEG Data** (`eeg` type)
+- `e1_0` through `e1_N`: Electrode 1 (TP9) frequency bins
+- `e2_0` through `e2_N`: Electrode 2 (AF7) frequency bins
+- `e3_0` through `e3_N`: Electrode 3 (AF8) frequency bins
+- `e4_0` through `e4_N`: Electrode 4 (TP10) frequency bins
+- `e5_0` through `e5_N`: Electrode 5 (AUX) frequency bins
+
+#### EEG Frequency Binning
+- **Low frequencies (≤30 Hz)**: Individual 1 Hz bins
+- **High frequencies (>30 Hz)**: Groups of 4 bins averaged together
+- **Total bins**: ~140 frequency bins per electrode (0-128 Hz range)
+- **Sampling rate**: 256 Hz with 512-point FFT
+
+### Sample Data Rows
+
+```csv
+type,timestamp,gyroX,gyroY,gyroZ,accelerometerX,accelerometerY,accelerometerZ,ppg1_ambient,ppg2_infrared,ppg3_red,event,e1_0,e1_1,e1_2,...
+gyro,1752090350.475,0.628,2.243,-0.037,,,,,,,,,,,,...
+accelerometer,1752090350.478,,,-0.989,-0.083,0.018,,,,,,,,,,...
+ppg,1752090481.575,,,,,,,90163,119067,972,,,,,,...
+event,1752090362.157,,,,,,,,,,3MIN_RECORDING_START,,,,...
+eeg,1752090350.543,,,,,,,,,,,94.75,37.93,23.00,41.31,...
+```
+
+## Installation
+
+### Prerequisites
+
+#### Required Software
+- **Node.js**: Version 10.x (required for Muse interaction)
+- **Yarn**: Package manager
+- **Python**: 3.7+ (for backend server)
+- **Git**: For repository management
+
+#### Installation Commands
+
+**1. Install Homebrew (macOS)**
+```bash
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-## Install yarn
-# NOTE: this will also install Node.js if it is not already installed.
-brew install yarn 
-
-# NOTE: Node.js must be version 10.x for Muse interaction
-
-# Thus, if you are getting version issues, install n, with the following command:
-# sudo npm install -g n
-
-# Then, you can switch to version 10.x with the following command:
-# sudo n 10.16.0
 ```
 
-Then, in Terminal/`bash`, clone this Git repository and change directory into the newly cloned folder:
+**2. Install Node.js 10.x**
+```bash
+# Install Node version manager
+sudo npm install -g n
 
-```sh
-git clone https://github.com/kylemath/lags-bs
-cd EEGEdu
+# Install Node.js 10.x
+sudo n 10.16.0
+
+# Verify installation
+node --version  # Should show v10.16.0
 ```
 
-Then, you can install the required `yarn` packages:
+**3. Install Yarn**
+```bash
+brew install yarn
+```
 
-```sh
+**4. Clone Repository**
+```bash
+git clone https://github.com/kylemath/MAESTRO
+cd MAESTRO
+```
+
+**5. Install Dependencies**
+```bash
 yarn install
 ```
 
-## Local Development Environment
-Then, you can run the *Local Development Environment*:
+## Local Development
 
-```sh
-yarn start dev
+### Frontend Development
+
+**1. Start Development Server**
+```bash
+# Ensure correct Node.js version
+export PATH="/usr/local/bin:$PATH"
+
+# Start development server
+yarn start
 ```
 
-If it is working correctly, the application will automatically open in a browser window at http://localhost:3000.
+**2. Access Application**
+- Open browser to: http://localhost:3000
+- Application will auto-reload on code changes
 
+### Backend Development
 
-
-
-
-## Local Production Environment
-
-To start the *Local Production Environment*, you can use the following commands: 
-
-```sh
-yarn cache clean
-yarn run build
-serve -s build
+**1. Set Up Python Environment**
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-## Local Testing of Changes
+**2. Install Backend Dependencies**
+```bash
+pip install -r requirements.txt
+```
 
-1. Install any new packages `yarn install`
-1. Start the *Local Development Environment* `yarn start dev`
-1. Look for errors in terminal log
-1. Open's browser to http://localhost:3000
-1. Open Javascript console
-1. Look for errors in console
-1. Connect Mock data stream by clicking Connect button
-1. step through website features while reading console
+**3. Start Backend Server**
+```bash
+python file_server.py
+```
+
+**4. Access Backend**
+- API endpoint: http://localhost:8080
+- Upload form: http://localhost:8080/upload_form
+
+## Testing
+
+### Local Testing Procedure
+
+**1. Environment Setup**
+```bash
+# Terminal 1: Start frontend
+export PATH="/usr/local/bin:$PATH"
+yarn start
+
+# Terminal 2: Start backend
+cd backend
+source venv/bin/activate
+python file_server.py
+```
+
+**2. Application Testing**
+1. **Navigation**: Verify all pages load correctly
+2. **Muse Connection**: Test with mock data stream
+3. **Data Visualization**: Check real-time EEG charts
+4. **Event Logging**: Test all event buttons
+5. **3-Minute Recording**: Test timer functionality
+6. **Data Export**: Verify CSV file generation
+7. **File Upload**: Test backend file upload (if enabled)
+
+**3. Console Monitoring**
+- **Frontend**: Check browser console for JavaScript errors
+- **Backend**: Monitor Flask server logs for errors
+- **Network**: Verify API communication in browser dev tools
+
+**4. Test Scenarios**
+```bash
+# Test with mock data
+1. Click "Connect" to start mock data stream
+2. Verify EEG visualization updates
+3. Test each event button
+4. Start 3-minute recording
+5. Verify countdown timer
+6. Stop recording and download CSV
+7. Verify CSV file structure
+```
+
+### Automated Testing
+```bash
+# Run Jest tests
+yarn test
+
+# Run tests in watch mode
+yarn test --watch
+```
 
 ## Deployment
 
-[FaceOff](https://faceoff.eegedu.com) is running on [Firebase](https://firebase.google.com/) and deployment happens automagically using GitHub post-commit hooks, or [Actions](https://github.com/kylemath/Faceoff/actions), as they are commonly called. You can see how the application is build and deployed by [inspecting the workflow](https://github.com/kylemath/Faceoff/blob/master/.github/workflows/workflow.yml). 
+### Firebase Deployment
 
-Currently this automagic deployment is not working, so we can deploy to firebase manually:
-
-First, install the Firebase deployment tools:
-
-```sh
-sudo brew install firebase
+**1. Install Firebase CLI**
+```bash
 sudo yarn global add firebase-tools
-sudo yarn global add firebase
 ```
 
-The first deployment requires login and initialization once:
-
-```sh
+**2. Login to Firebase**
+```bash
 firebase login
 ```
 
-Browser opens, and login to Google account authorized for Firebase deployment:
-
-```sh
+**3. Initialize Firebase (First Time Only)**
+```bash
 firebase init
 ```
+- Select: "Hosting: Configure files for Firebase Hosting"
+- Public directory: `build`
+- Single-page app: `Yes`
+- Overwrite index.html: `No`
 
-* options: Hosting Sites only
-* public directory: build
-* single-page app: No
-* Overwrite - No
-* Overwrite - No
-
-Then, deployment to Firebase happens with the following commands:
-
-```sh
-# clean the local cache to ensure most recent version is served
+**4. Build and Deploy**
+```bash
+# Clean cache
 yarn cache clean
 
-# build the latest version of the site
+# Build production version
 yarn run build
 
-# deploy the latest version to firebase
+# Deploy to Firebase
 firebase deploy
 ```
+
+### Manual Deployment Steps
+
+**1. Prepare Build**
+```bash
+# Clean environment
+yarn cache clean
+rm -rf build/
+rm -rf node_modules/
+
+# Fresh install
+yarn install
+
+# Build for production
+yarn run build
+```
+
+**2. Test Production Build Locally**
+```bash
+# Install serve globally
+yarn global add serve
+
+# Test production build
+serve -s build
+```
+
+**3. Deploy to Firebase**
+```bash
+firebase deploy --only hosting
+```
+
+### Backend Deployment
+
+The backend Flask server is intended for local development only. For production:
+
+1. **Disable Remote Upload**: Ensure `ENABLE_REMOTE_UPLOAD` is `False`
+2. **Local File Storage**: CSV files are downloaded directly to user's computer
+3. **No Server Required**: Frontend operates independently in production
+
+## Deployed Addresses
+
+### Production Deployment
+- **Frontend**: https://maestro-eeg.web.app (Firebase Hosting)
+- **Alternative**: https://maestro-eeg.firebaseapp.com
+- **Backend**: Local development only (no production backend)
+
+### Development Endpoints
+- **Frontend**: http://localhost:3000
+- **Backend**: http://localhost:8080
+- **API Upload**: http://localhost:8080/singleupload
+
+### Legacy Addresses
+- **Previous Remote Backend**: https://data.entheosense.com/api/singleupload (deprecated)
+- **Previous Domain**: Voyage/Entheosense branding (replaced with MAESTRO)
+
+## Device Compatibility
+
+### Supported Muse Models
+
+MAESTRO is designed to work with **PPG-capable Muse devices** but has **limited device model detection**:
+
+#### Currently Supported
+- **Muse S**: Primary target device (has PPG sensors for heart rate)
+- **Muse 2**: Should work (has PPG sensors)
+- **Modern Muse devices** with Bluetooth Low Energy (BLE) support
+
+#### Limited/Unknown Support
+- **Muse 2016**: May work but not explicitly tested
+- **Muse 2014**: Likely incompatible (lacks PPG sensors)
+- **Original Muse**: Likely incompatible (older BLE protocol)
+
+### Device Configuration
+
+The application uses **hardcoded device settings**:
+
+```javascript
+window.nchans = 4                    // Fixed to 4 EEG channels
+window.source.enableAux = false;     // AUX channel disabled
+window.source.enablePpg = true;      // PPG enabled for heart rate
+```
+
+#### EEG Electrodes
+- **4 Main Channels**: TP9, AF7, AF8, TP10
+- **1 AUX Channel**: Available but disabled by default
+- **Total**: 5 electrodes assumed (`["e1", "e2", "e3", "e4", "e5_aux"]`)
+
+#### Sensor Requirements
+- **EEG**: 256 Hz sampling rate
+- **PPG**: 64 Hz sampling rate (required for heart rate monitoring)
+- **Accelerometer**: 3-axis motion data
+- **Gyroscope**: 3-axis rotation data
+
+### BLE Compatibility
+
+#### Web Bluetooth Requirements
+- **Browser Support**: Chrome, Edge (Web Bluetooth API)
+- **BLE Version**: Uses generic Web Bluetooth API
+- **No Version Detection**: Does not check specific BLE protocol versions
+
+#### Custom muse-js Library
+MAESTRO uses a **specialized fork** of muse-js:
+```json
+"muse-js": "https://github.com/caydenpierce/muse-js#ppg_build"
+```
+- **PPG Support**: Enhanced for heart rate monitoring
+- **Device Specific**: May have optimizations for newer Muse models
+
+### Known Limitations
+
+#### Missing Features
+- **No Device Model Detection**: Cannot identify specific Muse hardware
+- **No BLE Version Checking**: Does not verify Bluetooth compatibility
+- **Fixed Configuration**: Cannot adapt to different electrode layouts
+- **No Capability Detection**: Assumes all sensors are available
+
+#### Potential Issues
+- **Older Devices**: May fail to connect or provide incomplete data
+- **Different Electrode Counts**: Cannot handle non-standard configurations
+- **Missing PPG**: Will not work properly without heart rate sensors
+- **Browser Compatibility**: Limited to Web Bluetooth supporting browsers
+
+### Future Enhancements Needed
+
+For comprehensive device support, the following would be required:
+
+#### Device Detection
+1. **Model Identification**: Detect Muse 2014/2016/2/S at connection time
+2. **Capability Checking**: Verify available sensors (EEG, PPG, accelerometer)
+3. **Configuration Adaptation**: Adjust settings based on device capabilities
+
+#### BLE Improvements
+1. **Version Compatibility**: Check BLE protocol version support
+2. **Service Discovery**: Enumerate available GATT services
+3. **Fallback Handling**: Graceful degradation for older devices
+
+#### Connection Management
+1. **Reconnect Feature**: Implement automatic reconnection when device disconnects
+   - Detect connection loss events
+   - Attempt automatic reconnection with exponential backoff
+   - Preserve session state during temporary disconnections
+   - User notification for connection status changes
+   - Manual reconnect button for failed auto-reconnection
+
+#### Code Changes Required
+```javascript
+// Example of needed device detection
+async function detectDeviceModel() {
+  const deviceInfo = await window.source.getDeviceInfo();
+  switch(deviceInfo.model) {
+    case 'muse-s':
+      return { channels: 4, hasPPG: true, sampleRate: 256 };
+    case 'muse-2':
+      return { channels: 4, hasPPG: true, sampleRate: 256 };
+    case 'muse-2016':
+      return { channels: 4, hasPPG: false, sampleRate: 256 };
+    default:
+      throw new Error('Unsupported device model');
+  }
+}
+```
+
+## Contributing
+
+### Development Workflow
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make changes and test locally
+4. Commit changes: `git commit -am 'Add feature'`
+5. Push to branch: `git push origin feature-name`
+6. Create Pull Request
+
+### Code Style
+- **JavaScript**: Follow existing React patterns
+- **Python**: Follow PEP 8 guidelines
+- **Components**: Use functional components with hooks
+- **Testing**: Add tests for new features
+
+### Issue Reporting
+- Use GitHub Issues for bug reports
+- Include reproduction steps
+- Provide console logs and error messages
+- Specify browser and system information
+
+---
+
+**Need Help?** Check the [PROGRESS.md](PROGRESS.md) file for detailed development notes and troubleshooting information.
 
