@@ -69,6 +69,7 @@ export function App() {
     const [patientDosage, setPatientDosage] = useState('');
     const [patientTimeAdministered, setPatientTimeAdministered] = useState('');
     const [patientAddNotes, setPatientAddNotes] = useState('');
+    // eslint-disable-next-line no-unused-vars
     const [patientPostAddNotes, setPatientPostAddNotes] = useState('');
     const [patientAge, setPatientAge] = useState('');
     const [patientGender, setPatientGender] = useState('');
@@ -132,10 +133,10 @@ export function App() {
             csvStringArray, 
             {type: "text/plain;charset=utf-8"}
           );
-        var csvFileName = "patientID%" + patientID + '_' + "age%" + age + "_" + "gender%" + gender + "_" +
-                            "weight%" + weight + '_'+ 
-                            "medication%" + medication + '_' +
-                            "dosage%" + dosage + '_' +
+        var csvFileName = "patientID%" + patientID + "_age%" + age + "_gender%" + gender + "_" +
+                            "weight%" + weight + "_"+ 
+                            "medication%" + medication + "_" +
+                            "dosage%" + dosage + "_" +
                             "dosageTime%" + dosageTime + "_" +
                             "time%" + Date.now() + "_MAESTRORecording.csv";
         saveAs(blob, csvFileName);      
