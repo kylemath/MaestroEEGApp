@@ -23,6 +23,9 @@ import {
 import {NotificationContainer} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
 
+// Import Bluetooth compatibility layer
+import { initializeBluetoothCompat } from '../../utils/bluetoothCompat';
+
 // Configuration: Set to false to disable remote upload temporarily
 const ENABLE_REMOTE_UPLOAD = false;
 
@@ -73,6 +76,11 @@ export function App() {
     const [patientPostAddNotes, setPatientPostAddNotes] = useState('');
     const [patientAge, setPatientAge] = useState('');
     const [patientGender, setPatientGender] = useState('');
+
+    // Initialize Bluetooth compatibility on app start
+    React.useEffect(() => {
+        initializeBluetoothCompat();
+    }, []);
 
     function handleLoginSuccess() {
         setLoginStatus(true);
