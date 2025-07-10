@@ -1,8 +1,8 @@
 // Bluetooth compatibility layer for Capacitor Android app
-import { Capacitor } from '@capacitor/core';
 
 export const isCapacitorApp = () => {
-  return Capacitor.isNativePlatform();
+  // Check if running in Capacitor
+  return window.Capacitor && window.Capacitor.isNative;
 };
 
 export const initializeBluetoothCompat = () => {
