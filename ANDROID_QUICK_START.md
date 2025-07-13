@@ -5,18 +5,27 @@
 ### Prerequisites
 - Node.js 10.x (already installed)
 - Android Studio
-- **Java 17** (automatically configured via brew install)
+- **Java 17** (automatically configured)
 
-### ✅ Java 21 Compatibility RESOLVED
-- **Problem**: Java 21 incompatible with Gradle 7.6 
-- **Solution**: Use Java 17 (installed and configured below)
-- **Status**: ✅ **RESOLVED** - Gradle now uses Java 17.0.15
+### ✅ All Compatibility Issues RESOLVED
+- **Java 21 → Java 17**: ✅ **RESOLVED**
+- **Gradle Cache Corruption**: ✅ **RESOLVED**  
+- **Gradle Auto-Upgrade**: ✅ **LOCKED** (read-only wrapper)
+- **Status**: Ready for stable Android Studio builds
 
-### Current Configuration
-- **Gradle**: 7.6 (Java 17 compatible)
-- **Android Gradle Plugin**: 7.4.2 (Java 17 compatible)
+### Current Configuration (LOCKED)
+- **Gradle**: 7.6 🔒 **LOCKED** (read-only wrapper)
+- **Android Gradle Plugin**: 7.4.2 (compatible)
 - **Capacitor**: 2.x (Node 10 compatible)
 - **Java**: 17.0.15 (forced via gradle.properties)
+
+### 🚨 BEFORE Opening Android Studio
+**READ THIS FIRST:** [ANDROID_STUDIO_SETUP.md](ANDROID_STUDIO_SETUP.md)
+
+**Critical Android Studio Settings:**
+- Set **Gradle JDK** to **"Use Embedded JDK (recommended)"**
+- **NEVER** click "Upgrade Gradle" prompts
+- **ALWAYS** click "Cancel" or "Keep Current Version"
 
 ### 1. Install Dependencies
 ```bash
@@ -39,11 +48,16 @@ npm run build
 npx cap sync android
 ```
 
-### 4. Open in Android Studio
+### 4. Open in Android Studio (CAREFULLY)
 ```bash
 # Open Android project
 npx cap open android
 ```
+
+**THEN in Android Studio:**
+1. **Set Gradle JDK** to "Use Embedded JDK (recommended)"
+2. **Decline any Gradle upgrade prompts**
+3. Wait for sync (should complete without errors)
 
 ### 5. Build APK in Android Studio
 In Android Studio:
@@ -55,19 +69,6 @@ In Android Studio:
 After initial setup, use:
 ```bash
 npx cap sync android && npx cap open android
-```
-
-## ✅ Java Configuration (Auto-Configured)
-The project is now configured to automatically use Java 17:
-- **Java 17**: Installed via `brew install openjdk@17`
-- **gradle.properties**: Forces Java 17 usage
-- **System Integration**: Java 17 symlinked for system recognition
-- **Gradle Detection**: Confirms Java 17 in `./gradlew --version`
-
-### Manual Java Check
-```bash
-cd android && ./gradlew --version
-# Should show: JVM: 17.0.15 (Homebrew 17.0.15+0)
 ```
 
 ## 📱 Key Features Working Offline
@@ -82,10 +83,13 @@ cd android && ./gradlew --version
 
 ## 🐛 Troubleshooting
 
-### ✅ Java 21 Issues (RESOLVED)
-- **Fixed**: Java 21 compatibility with Gradle 7.6
-- **Solution**: Java 17 auto-configured via gradle.properties
-- **Verification**: `./gradlew --version` shows Java 17.0.15
+### ✅ All Major Issues RESOLVED
+- **Java 21 Issues**: ✅ **RESOLVED** (using Java 17)
+- **Gradle Cache**: ✅ **RESOLVED** (cleaned completely)
+- **Auto-Upgrade**: ✅ **PREVENTED** (locked wrapper)
+
+### If Android Studio Changes Gradle Version
+**See:** [ANDROID_STUDIO_SETUP.md](ANDROID_STUDIO_SETUP.md) for emergency reset
 
 ### Bluetooth Issues
 - Enable Location Services
@@ -105,11 +109,14 @@ cd .. && npx cap sync android
 4. App should work completely offline!
 
 ## 📋 Current Status
-- ✅ **Java Compatibility**: RESOLVED (using Java 17)
-- ✅ **Project Setup**: Complete
-- ✅ **Offline Features**: Ready
-- ⚠️ **Build Status**: Minor dependency version issues remain
-- 🎯 **Ready For**: Android Studio builds
+- ✅ **Java Compatibility**: RESOLVED (Java 17)
+- ✅ **Gradle Configuration**: LOCKED (7.6, read-only)
+- ✅ **Cache Issues**: RESOLVED (clean environment)  
+- ✅ **Auto-Upgrade Prevention**: ACTIVE (locked wrapper)
+- ✅ **Project Setup**: Complete and protected
+- 🎯 **Ready For**: Stable Android Studio builds
 
-## 📄 Full Documentation
-See [ANDROID_BUILD_GUIDE.md](ANDROID_BUILD_GUIDE.md) for detailed instructions. 
+## 📄 Documentation
+- **[ANDROID_STUDIO_SETUP.md](ANDROID_STUDIO_SETUP.md)** - CRITICAL setup guide
+- **[JAVA_21_SOLUTION.md](JAVA_21_SOLUTION.md)** - Java compatibility solution  
+- **[ANDROID_BUILD_GUIDE.md](ANDROID_BUILD_GUIDE.md)** - Detailed build instructions 
