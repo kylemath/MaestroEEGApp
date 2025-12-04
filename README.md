@@ -471,3 +471,10 @@ async function detectDeviceModel() {
 
 **Need Help?** Check the [PROGRESS.md](PROGRESS.md) file for detailed development notes and troubleshooting information.
 
+
+## Preview
+
+<p align="center">
+  <img src="screenshot.png" alt="Project screenshot" width="720" />
+</p>
+

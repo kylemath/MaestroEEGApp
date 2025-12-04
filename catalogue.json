@@ -1,0 +1,11 @@
+{
+  "id": "maestroV2",
+  "title": "MaestroV2",
+  "oneLiner": "An online app to record EEG data from Muse devices",
+  "demoUrl": "https://maestroapp.ca/",
+  "screenshot": "screenshot.png",
+  "kind": "page",
+  "categories": ["eeg", "recording", "data"],
+  "tags": ["eeg", "recording", "data"],
+  "status": "published"
+}
