@@ -16,7 +16,7 @@ import { saveAs } from 'file-saver';
 
 import { zipSamples, channelNames } from "muse-js";
 
-import { Bar } from "react-chartjs-2";
+import { Bar, Line } from "react-chartjs-2";
 
 import {
   bandpassFilter,
@@ -102,7 +102,11 @@ export function setup(setData, setDataPpg, Settings) {
     window.subscriptionQual = window.multicastQuality$.subscribe(data => {
       setData(qualData => {
         Object.values(qualData).forEach((channel, index) => {
-            channel.datasets[0].qual = standardDeviation(data.data[index])
+            channel.datasets[0].qual = standardDeviation(data.data[index]);
+            // Store raw EEG data for plotting (take last 100 samples)
+            channel.datasets[0].rawData = data.data[index].slice(-100);
+            // Create time labels for the raw data
+            channel.datasets[0].timeLabels = Array.from({length: 100}, (_, i) => i);
         });
 
         return {
@@ -172,7 +176,7 @@ export function RenderModule(channels) {
   function RenderCharts() {
   
   if (channels.data['ch0'].datasets[0].qual) {
-      const options = {
+      const qualityOptions = {
           ...generalOptions,
           scales: {
             xAxes: [
@@ -202,7 +206,7 @@ export function RenderModule(channels) {
           }
         };
 
-      const data = {
+      const qualityData = {
         datasets: [{
           label: 'Data Quality by Channel',
           data: [
@@ -210,18 +214,12 @@ export function RenderModule(channels) {
             channels.data['ch1'].datasets[0].qual,
             channels.data['ch2'].datasets[0].qual,
             channels.data['ch3'].datasets[0].qual,
-//            channels.dataPPG['ch0'].datasets[0].qual,
-//            channels.dataPPG['ch1'].datasets[0].qual,
-//            channels.dataPPG['ch2'].datasets[0].qual
           ], 
           backgroundColor: [
             'rgb(255, 99, 132)',
             'rgb(75, 192, 192)',
             'rgb(255, 205, 86)',
             'rgb(201, 203, 207)',
-//            'rgb(255, 0, 0)',
-//            'rgb(0, 255, 0)',
-//            'rgb(0, 0, 255)'
           ]
         }],
 
@@ -230,32 +228,110 @@ export function RenderModule(channels) {
           channelNames[1],
           channelNames[2],
           channelNames[3],
-//          'ppg0',
-//          'ppg1',
-//          'ppg2'
         ]
-      };  
+      };
+
+      // Raw EEG Data Options
+      const rawEegOptions = {
+        ...generalOptions,
+        scales: {
+          xAxes: [
+            {
+              scaleLabel: {
+                ...generalOptions.scales.xAxes[0].scaleLabel,
+                labelString: "Sample Number"
+              }
+            }
+          ],
+          yAxes: [
+            {
+              scaleLabel: {
+                ...generalOptions.scales.yAxes[0].scaleLabel,
+                labelString: "Voltage (µV)"
+              }
+            }
+          ]
+        },
+        animation: {
+          duration: 0
+        },
+        title: {
+          ...generalOptions.title,
+          text: 'Live Raw EEG Data'
+        },
+        legend: {
+          display: true
+        }
+      };
+
+      // Check if we have raw data
+      const hasRawData = channels.data['ch0'].datasets[0].rawData && 
+                         channels.data['ch0'].datasets[0].rawData.length > 0;
+
+      let rawEegData = null;
+      if (hasRawData) {
+        rawEegData = {
+          datasets: [
+            {
+              label: channelNames[0],
+              borderColor: 'rgb(255, 99, 132)',
+              data: channels.data['ch0'].datasets[0].rawData,
+              fill: false
+            },
+            {
+              label: channelNames[1],
+              borderColor: 'rgb(75, 192, 192)', 
+              data: channels.data['ch1'].datasets[0].rawData,
+              fill: false
+            },
+            {
+              label: channelNames[2],
+              borderColor: 'rgb(255, 205, 86)',
+              data: channels.data['ch2'].datasets[0].rawData,
+              fill: false
+            },
+            {
+              label: channelNames[3],
+              borderColor: 'rgb(201, 203, 207)',
+              data: channels.data['ch3'].datasets[0].rawData,
+              fill: false
+            }
+          ],
+          labels: channels.data['ch0'].datasets[0].timeLabels
+        };
+      }
        
       return (
-        <Card title={"Signal Quality"}>
+        <Card title={"Signal Quality & Live Data"}>
           <Card.Section>
-          <div>
+            <div>
               <div className="flexyRow">
-                  {RenderQualityStatus()}
+                {RenderQualityStatus()}
               </div>
-             <Card.Section key={"Card_" + 1}>
-              <Bar key={"Line_" + 1} data={data} options={options} />
-            </Card.Section>
-          </div>
+              <Card.Section key={"QualityCard"}>
+                <Bar key={"QualityChart"} data={qualityData} options={qualityOptions} />
+              </Card.Section>
+              
+              {hasRawData && (
+                <Card.Section key={"RawEEGCard"}>
+                  <Line key={"RawEEGChart"} data={rawEegData} options={rawEegOptions} />
+                </Card.Section>
+              )}
+              
+              {!hasRawData && (
+                <Card.Section key={"NoDataCard"}>
+                  <p>Raw EEG data will appear here once connected...</p>
+                </Card.Section>
+              )}
+            </div>
           </Card.Section>
           <Card.Section>
-              <Button
-                variant="contained"
-                color="primary"
-               onClick={channels.acceptQuality}
-              >Continue</Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={channels.acceptQuality}
+            >Continue</Button>
           </Card.Section>
-
         </Card>
       );
 

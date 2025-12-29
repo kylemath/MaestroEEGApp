@@ -10,52 +10,52 @@ export const chartStyles = {
 
 export const emptyPpgChannelData = {
   ch0: {
-    datasets: [{}]
+    datasets: [{ data: null }]
   },
   ch1: {
-    datasets: [{}]
+    datasets: [{ data: null }]
   },
   ch2: {
-    datasets: [{}]
+    datasets: [{ data: null }]
   }
 };
 
 export const emptyChannelData = {
   ch0: {
-    datasets: [{}]
+    datasets: [{ data: null }]
   },
   ch1: {
-    datasets: [{}]
+    datasets: [{ data: null }]
   },
   ch2: {
-    datasets: [{}]
+    datasets: [{ data: null }]
   },
   ch3: {
-    datasets: [{}]
+    datasets: [{ data: null }]
   }
 };
 
 export const emptyAuxChannelData = {
   ch0: {
-    datasets: [{}]
+    datasets: [{ data: null, qual: null, rawData: null, timeLabels: null }]
   },
   ch1: {
-    datasets: [{}]
+    datasets: [{ data: null, qual: null, rawData: null, timeLabels: null }]
   },
   ch2: {
-    datasets: [{}]
+    datasets: [{ data: null, qual: null, rawData: null, timeLabels: null }]
   },
   ch3: {
-    datasets: [{}]
+    datasets: [{ data: null, qual: null, rawData: null, timeLabels: null }]
   },
   ch4: {
-    datasets: [{}]
+    datasets: [{ data: null, qual: null, rawData: null, timeLabels: null }]
   }
 };
 
 export const emptySingleChannelData = {
   ch1: {
-    datasets: [{}]
+    datasets: [{ data: null }]
   }
 };
 

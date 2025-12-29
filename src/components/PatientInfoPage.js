@@ -70,7 +70,7 @@ export function PatientInfoPage(props) {
                 <TextField label="Additional Notes" onChange={event => setPatientAddNotes(event.target.value)} value={patientAddNotes} style={{width: '20vw'}}></TextField>
               </Grid>
 
-              <Grid item xs={32}>
+              <Grid item xs={12}>
                 <Button onClick={handleSubmit} variant="contained" color="primary" type="submit"> Submit </Button>
               </Grid>
             </Grid>

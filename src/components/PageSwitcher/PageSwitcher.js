@@ -130,6 +130,8 @@ export function PageSwitcher(props) {
         return <funQual.RenderModule data={qualData} dataPPG={ppgData} acceptQuality={acceptQuality}/>;
       case bands:
         return <funBands.RenderModule dataBands={bandsData} dataPPG={ppgData}/>;
+      case record:
+        return <funBands.RenderModule dataBands={bandsData} dataPPG={ppgData}/>;
       default:
         return null;
     }

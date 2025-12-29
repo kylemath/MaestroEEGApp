@@ -139,13 +139,13 @@ export function buildPipe(Settings) {
   // Build Pipe
   console.log('building PPG Pipe')
   window.pipePPG$ = zipSamplesPpg(window.source.ppgReadings$).pipe(
-//    bandpassFilter({ 
-//      cutoffFrequencies: [.1, 24], 
-//      nbChannels: 3 }),
     epoch({
       duration: Settings.ppgDuration,
       interval: 16,
       samplingRate: Settings.ppgSrate
+    }),
+    catchError(err => {
+      console.log(err);
     })
   );
 
@@ -167,34 +167,80 @@ export function buildPipe(Settings) {
 
 }
 
+// Function to extract frequency bands from FFT data
+function extractFrequencyBands(fftData, sampleRate, bins) {
+  const nyquistFreq = sampleRate / 2;
+  const freqResolution = nyquistFreq / (bins / 2);
+  
+  // Define frequency band ranges (in Hz)
+  const bands = {
+    delta: [1, 4],
+    theta: [4, 8], 
+    alpha: [8, 13],
+    beta: [13, 30],
+    gamma: [30, 50]
+  };
+  
+  const extractedBands = {
+    delta: [],
+    theta: [],
+    alpha: [],
+    beta: [],
+    gamma: []
+  };
+  
+  // Process each channel
+  for (let channelIndex = 0; channelIndex < fftData.length; channelIndex++) {
+    const channelData = fftData[channelIndex];
+    
+    // Calculate power for each frequency band
+    for (const [bandName, [lowFreq, highFreq]] of Object.entries(bands)) {
+      const startBin = Math.floor(lowFreq / freqResolution);
+      const endBin = Math.floor(highFreq / freqResolution);
+      
+      let bandPower = 0;
+      for (let i = startBin; i <= endBin && i < channelData.length; i++) {
+        bandPower += channelData[i];
+      }
+      
+      extractedBands[bandName][channelIndex] = bandPower;
+    }
+  }
+  
+  return extractedBands;
+}
+
 export function setup(setDataBands, setDataPpg, Settings) {
   console.log("Subscribing to " + Settings.name);
 
     dataToSave = [];
 
   if (window.multicastBands$) {
-//    window.subscriptBands = window.multicastBands$.subscribe(data => {
-//      setDataBands(bandsData => {
-//        Object.values(bandsData).forEach((channel, index) => {
-//            channel.datasets[0].data = [
-//              data.delta[index],
-//              data.theta[index],
-//              data.alpha[index],
-//              data.beta[index],
-//              data.gamma[index]
-//            ];
-//            channel.xLabels = bandLabels;
-//        });
-//
-//        return {
-//          ch0: bandsData.ch0,
-//          ch1: bandsData.ch1,
-//          ch2: bandsData.ch2,
-//          ch3: bandsData.ch3,
-//          ch4: bandsData.ch4
-//        };
-//      });
-//    });
+    window.subscriptBands = window.multicastBands$.subscribe(data => {
+      // Extract frequency bands from FFT data
+      const bands = extractFrequencyBands(data.psd, Settings.srate, Settings.bins);
+      
+      setDataBands(bandsData => {
+        Object.values(bandsData).forEach((channel, index) => {
+            channel.datasets[0].data = [
+              bands.delta[index],
+              bands.theta[index],
+              bands.alpha[index],
+              bands.beta[index],
+              bands.gamma[index]
+            ];
+            channel.labels = ['Delta', 'Theta', 'Alpha', 'Beta', 'Gamma'];
+        });
+
+        return {
+          ch0: bandsData.ch0,
+          ch1: bandsData.ch1,
+          ch2: bandsData.ch2,
+          ch3: bandsData.ch3,
+          ch4: bandsData.ch4
+        };
+      });
+    });
 
     window.multicastBands$.connect();
     console.log("Subscribed to " + Settings.name);
@@ -205,19 +251,32 @@ export function setup(setDataBands, setDataPpg, Settings) {
   console.log("Subscribing to PPG");
   if (window.multicastPPG$) {
     window.subscriptPPG = window.multicastPPG$.subscribe(data => {
-//        setDataPpg(ppgData => {
-//          Object.values(ppgData).forEach((channel, index) => {
-//              channel.datasets[0].data = data.psd[index];
-//              channel.xLabels = data.freqs;
-//          });
-//            console.log("GOT PPG");
-//
-//          return{
-//            ch0: ppgData.ch0,
-//            ch1: ppgData.ch1,
-//            ch2: ppgData.ch2
-//          };
-//        });
+        // Handle raw PPG epoch data (no FFT processing)
+        if (data.data && data.data.length >= 3) {
+          setDataPpg(ppgData => {
+            // data.data contains the raw samples for each channel
+            // Update each channel with its raw data
+            ppgData.ch0.datasets[0].data = [...data.data[0]]; // PPG channel 1
+            ppgData.ch1.datasets[0].data = [...data.data[1]]; // PPG channel 2  
+            ppgData.ch2.datasets[0].data = [...data.data[2]]; // PPG channel 3
+            
+            // Create sample indices as labels
+            const sampleLabels = data.data[0].map((_, index) => index);
+            ppgData.ch0.labels = sampleLabels;
+            ppgData.ch1.labels = sampleLabels;
+            ppgData.ch2.labels = sampleLabels;
+            
+            console.log("GOT RAW PPG DATA");
+
+            return{
+              ch0: ppgData.ch0,
+              ch1: ppgData.ch1,
+              ch2: ppgData.ch2
+            };
+          });
+        } else {
+          console.log("PPG data doesn't have expected format, received:", data);
+        }
       });
 
       window.multicastPPG$.connect();
@@ -326,7 +385,7 @@ const options2 = {
             {
               scaleLabel: {
                 ...generalOptions.scales.xAxes[0].scaleLabel,
-                labelString: 'Time (Seconds)'
+                labelString: 'Sample Index'
               }
             }
           ],
@@ -334,7 +393,7 @@ const options2 = {
             {
               scaleLabel: {
                 ...generalOptions.scales.yAxes[0].scaleLabel,
-                labelString: "Heart Rate (Beats Per Minute)"
+                labelString: "PPG Amplitude (Raw)"
               }
             }
           ]
@@ -344,14 +403,14 @@ const options2 = {
         },
         title: {
           ...generalOptions.title,
-          text: 'Heart Rate'
+          text: 'Raw PPG Data - All Channels'
         },
         legend: {
-          display: false
+          display: true
         }
       };     
 
-    if (channels.dataBands.ch0.datasets[0].data ) {
+    if (channels.dataBands.ch0.datasets[0].data && channels.dataBands.ch0.datasets[0].data.length > 0) {
 
         //reset log after 1000 msec so events only in event file for 1 second
         if ((Date.now() - eventPress) > 1000) {
@@ -399,13 +458,13 @@ const options2 = {
               data: runningAlpha3,
               fill: false      
             }],
-            xLabels: runningLabels
+            labels: runningLabels
           } 
 
         // -- bands chart
 
         let bandsData = JSON.parse(JSON.stringify(channels.dataBands.ch1.datasets[0].data))      
-        let bandsLabel = JSON.parse(JSON.stringify(channels.dataBands.ch1.xLabels))    
+        let bandsLabel = JSON.parse(JSON.stringify(channels.dataBands.ch1.labels))    
           
         let bandsOut = {
           datasets: [{
@@ -414,46 +473,33 @@ const options2 = {
             data: bandsData,
             fill: false  
           }],
-          xLabels: bandsLabel            
+          labels: bandsLabel            
         }
 
         // - PPG chart
 
-        if (channels.dataPPG.ch0.datasets[0].data) {
+        if (channels.dataPPG.ch0.datasets[0].data && channels.dataPPG.ch0.datasets[0].data.length > 0) {
 
-          const thisData = JSON.parse(JSON.stringify(channels.dataPPG.ch0.datasets[0].data));
-          const max = thisData.reduce(
-                                    function(a, b) { 
-                                      return Math.max(a, b)
-                                    }, 
-                                    -Infinity);
-          const idx = thisData.indexOf(max);
-          const maxfreq = channels.dataPPG.ch0.xLabels[idx];
-          currentHR = maxfreq * 60;
-          runningHR.push(currentHR);
-
-          runningHRCount = runningHRCount + 1;
-          //reset xlabels of graph
-          if (runningHRCount === 1) {
-            //firstTimeHR = Date.now();
-            xlabelsHR.push(0);
-
-          } else {
-
-            xlabelsHR.push((Date.now())/1000);
-
-          }
-          let runningLabelsHR = JSON.parse(JSON.stringify(xlabelsHR));
-
+          // Create multi-channel PPG chart with raw data
           let ppgOut = {
               datasets: [{
-                label: 'ch0',
+                label: 'PPG Channel 1 (Ambient)',
                 borderColor: 'rgba(217,95,2)',
-                data: runningHR,
+                data: channels.dataPPG.ch0.datasets[0].data,
                 fill: false  
+              }, {
+                label: 'PPG Channel 2 (Infrared)',
+                borderColor: 'rgba(27,158,119)',
+                data: channels.dataPPG.ch1.datasets[0].data,
+                fill: false              
+              }, {
+                label: 'PPG Channel 3 (Red)',
+                borderColor: 'rgba(117,112,179)',
+                data: channels.dataPPG.ch2.datasets[0].data,
+                fill: false      
               }],
-              xLabels: runningLabelsHR
-            } 
+              labels: channels.dataPPG.ch0.labels
+            }
 
           return (
             <React.Fragment>
@@ -491,7 +537,7 @@ const options2 = {
         <Card.Section>
             <TextContainer>
                 <p> {[
-                "Loading..."  
+                "Loading EEG Charts..."  
                 ]} 
                 </p>
             </TextContainer>   
